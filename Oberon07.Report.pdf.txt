@@ -1,6 +1,6 @@
                    The Programming Language Oberon
-                                Revision 1.10.2013 / 10.3.2014
-                                             Niklaus Wirth
+                                Revision 1.10.2013 / 22.2.2015
+                                            Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
 
@@ -45,7 +45,6 @@ The following lexical rules must be observed when composing symbols. Blanks and 
 must not occur within symbols (except in comments, and blanks in strings). They are ignored
 unless they are essential to separate two consecutive symbols. Capital and lower-case letters are
 considered as being distinct.
-
 
 
 
@@ -454,59 +453,77 @@ which are separated by semicolons.
 
 
                                                                                                             9
-        IfStatement = IF expression THEN StatementSequence
-              {ELSIF expression THEN StatementSequence}
-              [ELSE StatementSequence]
-              END.
+         IfStatement = IF expression THEN StatementSequence
+               {ELSIF expression THEN StatementSequence}
+               [ELSE StatementSequence]
+               END.
 If statements specify the conditional execution of guarded statements. The Boolean expression
 preceding a statement is called its guard. The guards are evaluated in sequence of occurrence,
 until one evaluates to TRUE, whereafter its associated statement sequence is executed. If no guard
 is satisfied, the statement sequence following the symbol ELSE is executed, if there is one.
 Example:
-       IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
-       ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
-       ELSIF ch = 22X THEN ReadString
-       END
+        IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
+        ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
+        ELSIF ch = 22X THEN ReadString
+        END
 
 9.5. Case statements
 Case statements specify the selection and execution of a statement sequence according to the
 value of an expression. First the case expression is evaluated, then the statement sequence is
-executed whose case label list contains the obtained value. The case expression must be of type
-INTEGER or CHAR, and all labels must be integers or single-character strings, respectively.
-   CaseStatement =      CASE expression OF case {"|" case} END.
-   case          =      [CaseLabelList ":" StatementSequence].
-   CaseLabelList =      LabelRange {"," LabelRange}.
-   LabelRange    =      label [".." label].
-   label         =      integer | string | ident.
+executed whose case label list contains the obtained value. If the case expression is of type
+INTEGER or CHAR, all labels must be integers or single-character strings, respectively.
+    CaseStatement =     CASE expression OF case {"|" case} END.
+    case          =     [CaseLabelList ":" StatementSequence].
+    CaseLabelList =     LabelRange {"," LabelRange} | qualident.
+    LabelRange    =     label [".." label].
+    label         =     integer | string.
 Example:
-       CASE k OF
-            0: x := x + y
-          | 1: x := x − y
-          | 2: x := x * y
-          | 3: x := x / y
-       END
-
-9.6. While statements
-While statements specify repetition. If any of the Boolean expressions (guards) yields TRUE, the
-corresponding statement sequence is executed. The expression evaluation and the statement
-execution are repeated until none of the Boolean expressions yields TRUE.
-       WhileStatement = WHILE expression DO StatementSequence
-              {ELSIF expression DO StatementSequence} END.
-Examples:
-       WHILE j > 0 DO
-          j := j DIV 2; i := i+1
-       END
-       WHILE (t # NIL) & (t.key # i) DO
-          t := t.left
-       END
-       WHILE m > n DO m := m – n
-       ELSIF n > m DO n := n – m
-       END
+        CASE k OF
+             0: x := x + y
+           | 1: x := x − y
+           | 2: x := x * y
+           | 3: x := x / y
+        END
+The type T of the case expression (case variable) may also be a record or pointer type. Then the
+case labels must be extensions of T, and in the statements Si labelled by Ti, the case variable is
+considered as of type Ti.
+Example:
+        TYPE R = RECORD a: INTEGER END ;
+           R0 = RECORD (R) b: INTEGER END ;
+           R1 = RECORD (R) b: REAL END ;
+           R2 = RECORD (R) b: SET END ;
+           P = POINTER TO R;
+           P0 = POINTER TO R0;
+           P1 = POINTER TO R1;
+           P2 = POINTER TO R2;
+        VAR p: P; p0: P0; p1: P1; p2: P2;
+        CASE p OF
+           P0: p0.b := 10 |
+           P1: p1.b := 2.5 |
+           P2: p2.b := {0, 2}
+        END
 
 
 
                                                                                                      10
- 9.7. Repeat Statements
+ 9.6. While statements
+While statements specify repetition. If any of the Boolean expressions (guards) yields TRUE, the
+corresponding statement sequence is executed. The expression evaluation and the statement
+execution are repeated until none of the Boolean expressions yields TRUE.
+         WhileStatement = WHILE expression DO StatementSequence
+                {ELSIF expression DO StatementSequence} END.
+Examples:
+         WHILE j > 0 DO
+            j := j DIV 2; i := i+1
+         END
+         WHILE (t # NIL) & (t.key # i) DO
+            t := t.left
+         END
+         WHILE m > n DO m := m – n
+         ELSIF n > m DO n := n – m
+         END
+
+9.7. Repeat Statements
 A repeat statement specifies the repeated execution of a statement sequence until a condition is
 satisfied. The statement sequence is executed at least once.
          RepeatStatement = REPEAT StatementSequence UNTIL expression.
@@ -532,7 +549,11 @@ If the step is not specified, it is assumed to be 1.
 10. Procedure declarations
 Procedure declarations consist of a procedure heading and a procedure body. The heading
 specifies the procedure identifier, the formal parameters, and the result type (if any). The body
-contains declarations and statements. The procedure identifier is repeated at the end of the
+
+
+
+                                                                                                         11
+ contains declarations and statements. The procedure identifier is repeated at the end of the
 procedure declaration.
 There are two kinds of procedures, namely proper procedures and function procedures. The latter
 are activated by a function designator as a constituent of an expression, and yield a result that is an
@@ -547,15 +568,12 @@ In addition to its formal parameters and locally declared objects, the objects d
 also visible in the procedure.
 The use of the procedure identifier in a call within its declaration implies recursive activation of the
 procedure.
-         ProcedureDeclaration = ProcedureHeading ";" ProcedureBody ident.
-         ProcedureHeading = PROCEDURE identdef [FormalParameters].
-         ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
-                 [RETURN expression] END.
-         DeclarationSequence = [CONST {ConstDeclaration ";"}]
-
-
-                                                                                                           11
-                 [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
+        ProcedureDeclaration = ProcedureHeading ";" ProcedureBody ident.
+        ProcedureHeading = PROCEDURE identdef [FormalParameters].
+        ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
+                [RETURN expression] END.
+        DeclarationSequence = [CONST {ConstDeclaration ";"}]
+                [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
                 {ProcedureDeclaration ";"}.
 
 10.1. Formal parameters
@@ -582,7 +600,11 @@ If the formal parameter's type is specified as
         ARRAY OF T
 the parameter is said to be an open array, and the corresponding actual parameter may be of
 arbitrary length.
-If a formal parameter specifies a procedure type, then the corresponding actual parameter must be
+
+
+
+                                                                                                           12
+ If a formal parameter specifies a procedure type, then the corresponding actual parameter must be
 either a procedure declared globally, or a variable (or parameter) of that procedure type. It cannot
 be a predefined procedure. The result type of a procedure can be neither a record nor an array.
 Examples of procedure declarations:
@@ -603,11 +625,7 @@ Examples of procedure declarations:
            REPEAT DEC(i); Write(CHR(buf[i] + ORD("0"))) UNTIL i = 0
         END WriteInt
         PROCEDURE log2(x: INTEGER): INTEGER;
-
-
-
-                                                                                                       12
-            VAR y: INTEGER; (*assume x>0*)
+           VAR y: INTEGER; (*assume x>0*)
         BEGIN y := 0;
            WHILE x > 1 DO x := x DIV 2; INC(y) END ;
            RETURN y
@@ -617,34 +635,37 @@ Examples of procedure declarations:
 The following table lists the predefined procedures. Some are generic procedures, i.e. they apply
 to several types of operands. v stands for a variable, x and n for expressions, and T for a type.
 Function procedures:
-        Name            Argument type              Result type    Function
-        ABS(x)          x: numeric type            type of x      absolute value
-        ODD(x)          x: INTEGER                 BOOLEAN        x MOD 2 = 1
-        LEN(v)          v: array                   INTEGER        the length of v
-        LSL(x, n)       x, n: INTEGER              INTEGER        logical shift left, x * 2n
-        ASR(x, n)       x, n: INTEGER              INTEGER        signed shift right, x DIV 2n
-        ROR(x, n)       x, n: INTEGER              INTEGER        x rotated right by n bits
+        Name            Argument type              Result type   Function
+        ABS(x)          x: numeric type            type of x     absolute value
+        ODD(x)          x: INTEGER                 BOOLEAN       x MOD 2 = 1
+        LEN(v)          v: array                   INTEGER       the length of v
+        LSL(x, n)       x, n: INTEGER              INTEGER       logical shift left, x * 2n
+        ASR(x, n)       x, n: INTEGER              INTEGER       signed shift right, x DIV 2n
+        ROR(x, n)       x, n: INTEGER              INTEGER       x rotated right by n bits
 Type conversion functions:
-        Name            Argument type              Result type    Function
-        FLOOR(x)        REAL                       INTEGER        round down
-        FLT(x)          INTEGER                    REAL           identity
-        ORD(x)          CHAR, BOOLEAN, SET         INTEGER        ordinal number of x
-        CHR(x)          INTEGER                    CHAR           character with ordinal number x
+        Name            Argument type              Result type   Function
+        FLOOR(x)        REAL                       INTEGER       round down
+        FLT(x)          INTEGER                    REAL          identity
+        ORD(x)          CHAR, BOOLEAN, SET         INTEGER       ordinal number of x
+        CHR(x)          INTEGER                    CHAR          character with ordinal number x
 
 Proper procedures:
         Name            Argument types             Function
-        INC(v)          INTEGER                    v := v + 1
-        INC(v, n)       INTEGER                    v := v + n
-        DEC(v)          INTEGER                    v := v - 1
-        DEC(v, n)       INTEGER                    v := v - n
-        INCL(v, x)      v: SET; x: INTEGER         v := v + {x}
-        EXCL(v, x)      v: SET; x: INTEGER         v := v - {x}
-        NEW(v)           pointer type              allocate v^
-        ASSERT(b)        BOOLEAN                   abort, if ~b
-        PACK(x, n)      REAL; INTEGER              pack x and n into x
-        UNPK(x, n)      REAL; INTEGER              unpack x into x and n
+        INC(v)          INTEGER                   v := v + 1
+        INC(v, n)       INTEGER                   v := v + n
+
+
+                                                                                                       13
+         DEC(v)             INTEGER                        v := v - 1
+        DEC(v, n)          INTEGER                        v := v - n
+        INCL(v, x)         v: SET; x: INTEGER             v := v + {x}
+        EXCL(v, x)         v: SET; x: INTEGER             v := v - {x}
+        NEW(v)             pointer type                   allocate v^
+        ASSERT(b)          BOOLEAN                        abort, if ~b
+        PACK(x, n)         REAL; INTEGER                  pack x and n into x
+        UNPK(x, n)         REAL; INTEGER                  unpack x into x and n
 The function FLOOR(x) yields the largest integer not greater than x.
-        FLOOR(1.5) = 1             FLOOR(-1.5) = -2
+        FLOOR(1.5) = 1                 FLOOR(-1.5) = -2
 The parameter n of PACK represents the exponent of x. PACK(x, y) is equivalent to x := x * 2y.
 UNPK is the reverse operation. The resulting x is normalized, such that 1.0 <= x < 2.0.
 
@@ -652,11 +673,7 @@ UNPK is the reverse operation. The resulting x is normalized, such that 1.0 <= x
 A module is a collection of declarations of constants, types, variables, and procedures, and a
 sequence of statements for the purpose of assigning initial values to the variables. A module
 typically constitutes a text that is compilable as a unit.
-
-
-
-                                                                                                    13
-         module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
+        module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
                        [BEGIN StatementSequence] END ident "." .
         ImportList    = IMPORT import {"," import} ";" .
         Import        = ident [":=" ident].
@@ -688,7 +705,12 @@ Example:
             BEGIN Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf)
             END WriteLn;
         BEGIN Texts.OpenWriter(W)
-        END Out.
+
+
+
+
+                                                                                                           14
+         END Out.
 
 11.1 The Module SYSTEM
 The optional module SYSTEM contains definitions that are necessary to program low-level
@@ -705,36 +727,33 @@ generally applicable. However, individual implementations may include in their m
 additional definitions that are particular to the specific, underlying computer. In the following, v
 stands for a variable, x, a, and n for expressions.
 Function procedures:
-        Name               Argument types          Result type              Function
-        ADR(v)             any                     INTEGER                  address of variable v
-        SIZE(T)            any type                INTEGER                  size in bytes
-
-
-                                                                                                           14
-         BIT(a, n)       a, n: INTEGER       BOOLEAN             bit n of mem[a]
+        Name            Argument types       Result type         Function
+        ADR(v)          any                  INTEGER             address of variable v
+        SIZE(T)         any type             INTEGER             size in bytes
+        BIT(a, n)       a, n: INTEGER        BOOLEAN             bit n of mem[a]
 
 Proper procedures:
-        Name            Argument types                          Function
+        Name            Argument types                           Function
         GET(a, v)      a: INTEGER; v: any basic type      v := mem[a]
         PUT(a, x)      a: INTEGER; x: any basic type      mem[a] := x
         COPY(src, dst, n) all INTEGER copy n consecutive words from src to dst
 The following are additional procedures accepted by the compiler for the RISC processor:
 Function procedures:
-        Name            Argument types      Result type         Function
-        VAL(T, n)       scalar              T                   identity
-        ADC(m, n)       INTEGER             INTEGER             add with carry C
-        SBC(m, n)       INTEGER             INTEGER             subtract with carry C
-        UML(m, n)       INTEGER             INTEGER             unsigned multiplication
-        COND(n)         INTEGER             BOOLEAN             IF Cond(8) THEN ...
+        Name            Argument types       Result type         Function
+        VAL(T, n)       scalar               T                   identity
+        ADC(m, n)       INTEGER              INTEGER             add with carry C
+        SBC(m, n)       INTEGER              INTEGER             subtract with carry C
+        UML(m, n)       INTEGER              INTEGER             unsigned multiplication
+        COND(n)         INTEGER              BOOLEAN             IF Cond(8) THEN ...
 
 Proper procedures:
-        Name            Argument types                          Function
-        LED(n)          INTEGER                                 display n on LEDs
+        Name            Argument types                           Function
+        LED(n)          INTEGER                                  display n on LEDs
 
 
 
 
-                                                                                           15
+                                                                                                        15
  Appendix
 The Syntax of Oberon
     letter = "A" | "B" | … | "Z" | "a" | "b" | … | "z".
