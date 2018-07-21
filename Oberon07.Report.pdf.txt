@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                Revision 1.10.2013 / 22.2.2015
+                                Revision 1.10.2013 / 18.3.2015
                                             Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -474,9 +474,9 @@ executed whose case label list contains the obtained value. If the case expressi
 INTEGER or CHAR, all labels must be integers or single-character strings, respectively.
     CaseStatement =     CASE expression OF case {"|" case} END.
     case          =     [CaseLabelList ":" StatementSequence].
-    CaseLabelList =     LabelRange {"," LabelRange} | qualident.
+    CaseLabelList =     LabelRange {"," LabelRange}.
     LabelRange    =     label [".." label].
-    label         =     integer | string.
+    label         =     integer | string | qualident.
 Example:
         CASE k OF
              0: x := x + y
@@ -496,11 +496,11 @@ Example:
            P0 = POINTER TO R0;
            P1 = POINTER TO R1;
            P2 = POINTER TO R2;
-        VAR p: P; p0: P0; p1: P1; p2: P2;
+        VAR p: P;
         CASE p OF
-           P0: p0.b := 10 |
-           P1: p1.b := 2.5 |
-           P2: p2.b := {0, 2}
+           P0: p.b := 10 |
+           P1: p.b := 2.5 |
+           P2: p.b := {0, 2}
         END
 
 
@@ -811,7 +811,7 @@ CaseStatement = CASE expression OF case {"|" case} END.
 case = [CaseLabelList ":" StatementSequence].
 CaseLabelList = LabelRange {"," LabelRange}.
 LabelRange = label [".." label].
-label = integer | string | ident.
+label = integer | string | qualident.
 WhileStatement = WHILE expression DO StatementSequence
   {ELSIF expression DO StatementSequence} END.
 RepeatStatement = REPEAT StatementSequence UNTIL expression.
