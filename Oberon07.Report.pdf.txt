@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                 Revision 1.10.2013 / 4.3.2016
+                                 Revision 1.10.2013 / 1.5.2016
                                             Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -26,7 +26,7 @@ This report is not intended as a programmer's tutorial. It is intentionally kept
 to serve as a reference for programmers, implementors, and manual writers. What remains unsaid
 is mostly left so intentionally, either because it is derivable from stated rules of the language, or
 because it would unnecessarily restrict the freedom of implementors.
-This document describes the language defined in 1988/90 as revised in 2007/11.
+This document describes the language defined in 1988/90 as revised in 2007 / 2016.
 
 2. Syntax
 A language is an infinite set of sentences, namely the sentences well formed according to its
@@ -138,21 +138,20 @@ program. Its operands are constants (see Ch. 8). Examples of constant declaratio
 A data type determines the set of values which variables of that type may assume, and the
 operators that are applicable. A type declaration is used to associate an identifier with a type. The
 types define the structure of variables of this type and, by implication, the operators that are
-applicable to components. There are two different structures, namely arrays and records, with
+applicable to components. There are two different data structures, namely arrays and records, with
 different component selectors.
-        TypeDeclaration = identdef "=" StrucType.
-        StrucType = ArrayType | RecordType | PointerType | ProcedureType.
-        type = qualident | StrucType.
+        TypeDeclaration = identdef "=" type.
+        type = qualident | ArrayType | RecordType | PointerType | ProcedureType.
 Examples:
         Table          =      ARRAY N OF REAL
         Tree           =      POINTER TO Node
         Node           =      RECORD key: INTEGER;
                                   left, right: Tree
+                              END
 
 
                                                                                                          3
-                               END
-        CenterNode =          RECORD (Node)
+         CenterNode =          RECORD (Node)
                                   name: ARRAY 32 OF CHAR;
                                   subnode: Tree
                               END
@@ -196,13 +195,12 @@ visible within field designators (see 8.1) referring to elements of record varia
         FieldListSequence = FieldList {";" FieldList}.
         FieldList      = IdentList ":" type.
         IdentList      = identdef {"," identdef}.
-
+If a record type is exported, field identifiers that are to be visible outside the declaring module must
+be marked. They are called public fields; unmarked fields are called private fields.
 
 
                                                                                                              4
- If a record type is exported, field identifiers that are to be visible outside the declaring module must
-be marked. They are called public fields; unmarked fields are called private fields.
-Record types are extensible, i.e. a record type can be defined as an extension of another record
+ Record types are extensible, i.e. a record type can be defined as an extension of another record
 type. In the examples above, CenterNode (directly) extends Node, which is the (direct) base type of
 CenterNode. More specifically, CenterNode extends Node with the fields name and subnode.
 Definition: A type T extends a type T0, if it equals T0, or if it directly extends an extension of T0.
@@ -247,16 +245,17 @@ declarations (refer to examples in Ch. 6):
         i, j, k:   INTEGER
         x, y:      REAL
         p, q:      BOOLEAN
+        s:         SET
+        f:         Function
+
 
 
                                                                                                              5
-          s:       SET
-         f:       Function
-         a:       ARRAY 100 OF REAL
+          a:       ARRAY 100 OF REAL
          w:       ARRAY 16 OF
-                        RECORD ch: CHAR;
-                            count: INTEGER
-                        END
+                       RECORD ch: CHAR;
+                           count: INTEGER
+                       END
          t:       Tree
 
 8. Expressions
@@ -300,11 +299,11 @@ The syntax of expressions distinguishes between four classes of operators with d
 precedences (binding strengths). The operator ~ has the highest precedence, followed by
 multiplication operators, addition operators, and relations. Operators of the same precedence
 associate from left to right. For example, x−y−z stands for (x−y)−z.
+         expression        = SimpleExpression [relation SimpleExpression].
 
 
                                                                                                              6
-         expression     = SimpleExpression [relation SimpleExpression].
-        relation       = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
+         relation       = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
         SimpleExpression = ["+"|"−"] term {AddOperator term}.
         AddOperator = "+" | "−" | OR.
         term           = factor {MulOperator factor}.
@@ -348,12 +347,11 @@ Then quotient q and remainder r are defined by the equation
          *          intersection
          /          symmetric set difference
 When used with a single operand of type SET, the minus sign denotes the set complement.
-
+8.2.4. Relations
 
 
                                                                                                         7
- 8.2.4. Relations
-         symbol       relation
+          symbol       relation
           =           equal
           #           unequal
           <           less
@@ -398,20 +396,20 @@ empty statement is included in order to relax punctuation rules in statement seq
 The assignment serves to replace the current value of a variable by a new value specified by an
 expression. The assignment operator is written as ":=" and pronounced as becomes.
          assignment = designator ":=" expression.
-
-
-
-
-                                                                                                        8
- If a value parameter is structured (of array or record type), no assignment to it or to its elements are
+If a value parameter is structured (of array or record type), no assignment to it or to its elements are
 permitted. Neither may assignments be made to imported variables.
-The type of the expression must be the same as that of the designator. The following exceptions
+
+
+
+                                                                                                           8
+ The type of the expression must be the same as that of the designator. The following exceptions
 hold:
 1. The constant NIL can be assigned to variables of any pointer or procedure type.
 2. Strings can be assigned to any array of characters, provided the number of characters in the
-  string is not greater than that of the array. If it is less, a null character (0X) is appended. Single-
-  character strings can also be assigned to variables of type CHAR.
+  string is less than that of the array. (A null character is appended). Single-character strings can
+  also be assigned to variables of type CHAR.
 3. In the case of records, the type of the source must be an extension of the type of the destination.
+4. An open array may be assigned to an array of equal base type.
 Examples of assignments (see examples in Ch. 7):
         i := 0
         p := i = j
@@ -454,7 +452,8 @@ which are separated by semicolons.
 
 
 
-                                                                                                            9
+
+                                                                                                         9
  If statements specify the conditional execution of guarded statements. The Boolean expression
 preceding a statement is called its guard. The guards are evaluated in sequence of occurrence,
 until one evaluates to TRUE, whereafter its associated statement sequence is executed. If no guard
@@ -744,7 +743,7 @@ Function procedures:
         ADC(m, n)       INTEGER              INTEGER             add with carry C
         SBC(m, n)       INTEGER              INTEGER             subtract with carry C
         UML(m, n)       INTEGER              INTEGER             unsigned multiplication
-        COND(n)         INTEGER              BOOLEAN             IF Cond(8) THEN ...
+        COND(n)         INTEGER              BOOLEAN             IF Cond(n) THEN ...
 
 Proper procedures:
         Name            Argument types                           Function
@@ -769,9 +768,8 @@ The Syntax of Oberon
     string = """ {character} """ | digit {hexDigit} "X".
     ConstDeclaration = identdef "=" ConstExpression.
     ConstExpression = expression.
-    TypeDeclaration = identdef "=" StrucType.
-    StrucType = ArrayType | RecordType | PointerType | ProcedureType.
-    type = qualident | StrucType.
+    TypeDeclaration = identdef "=" type.
+    type = qualident | ArrayType | RecordType | PointerType | ProcedureType.
     ArrayType = ARRAY length {"," length} OF type.
     length = ConstExpression.
     RecordType = RECORD ["(" BaseType ")"] [FieldListSequence] END.
@@ -803,11 +801,11 @@ The Syntax of Oberon
     StatementSequence = statement {";" statement}.
     IfStatement = IF expression THEN StatementSequence
        {ELSIF expression THEN StatementSequence}
+       [ELSE StatementSequence] END.
 
 
                                                                                16
-   [ELSE StatementSequence] END.
-CaseStatement = CASE expression OF case {"|" case} END.
+ CaseStatement = CASE expression OF case {"|" case} END.
 case = [CaseLabelList ":" StatementSequence].
 CaseLabelList = LabelRange {"," LabelRange}.
 LabelRange = label [".." label].
