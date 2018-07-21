@@ -227,6 +227,8 @@ types inherit the extension relation of their base types, if there is any. If a 
 T0 and P is a pointer type bound to T, then P is also an extension of P0, the pointer type bound to
 T0.
         PointerType = POINTER TO type.
+If a type P is defined as POINTER TO T, the identifier T can be declared textually following the
+declaration of P, but [if so] it must lie within the same scope.
 If p is a variable of type P = POINTER TO T, then a call of the predefined procedure NEW(p) has
 the following effect (see 10.2): A variable of type T is allocated in free storage, and a pointer to it is
 assigned to p. This pointer p is of type P and the referenced variable p^ is of type T. Failure of
@@ -244,23 +246,24 @@ standard procedure.
 Variable declarations serve to introduce variables and associate them with identifiers that must be
 unique within the given scope. They also serve to associate fixed data types with the variables.
         VariableDeclaration = IdentList ":" type.
-Variables whose identifiers appear in the same list are all of the same type. Examples of variable
-declarations (refer to examples in Ch. 6):
-        i, j, k:   INTEGER
+
 
 
 
                                                                                                              5
-          x, y:    REAL
-         p, q:    BOOLEAN
-         s:       SET
-         f:       Function
-         a:       ARRAY 100 OF REAL
-         w:       ARRAY 16 OF
-                        RECORD ch: CHAR;
-                            count: INTEGER
-                        END
-         t:       Tree
+ Variables whose identifiers appear in the same list are all of the same type. Examples of variable
+declarations (refer to examples in Ch. 6):
+         i, j, k:   INTEGER
+         x, y:      REAL
+         p, q:      BOOLEAN
+         s:         SET
+         f:         Function
+         a:         ARRAY 100 OF REAL
+         w:         ARRAY 16 OF
+                          RECORD ch: CHAR;
+                              count: INTEGER
+                          END
+         t:         Tree
 
 8. Expressions
 Expressions are constructs denoting rules of computation whereby constants and current values of
@@ -298,13 +301,13 @@ Examples of designators (see examples in Ch. 7):
          t.left.right                    (Tree)
          t(CenterNode).subnode           (Tree)
 
-8.2. Operators
-The syntax of expressions distinguishes between four classes of operators with different
-precedences (binding strengths). The operator ~ has the highest precedence, followed by
 
 
                                                                                                              6
- multiplication operators, addition operators, and relations. Operators of the same precedence
+ 8.2. Operators
+The syntax of expressions distinguishes between four classes of operators with different
+precedences (binding strengths). The operator ~ has the highest precedence, followed by
+multiplication operators, addition operators, and relations. Operators of the same precedence
 associate from left to right. For example, x−y−z stands for (x−y)−z.
         expression     = SimpleExpression [relation SimpleExpression].
         relation       = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
@@ -346,13 +349,13 @@ Then quotient q and remainder r are defined by the equation
 8.2.3. Set operators
         symbol      result
          +          union
-         −          difference
-         *          intersection
-         /          symmetric set difference
 
 
                                                                                                    7
- When used with a single operand of type SET, the minus sign denotes the set complement.
+           −           difference
+          *           intersection
+          /           symmetric set difference
+When used with a single operand of type SET, the minus sign denotes the set complement.
 8.2.4. Relations
          symbol       relation
           =           equal
@@ -396,13 +399,14 @@ empty statement is included in order to relax punctuation rules in statement seq
         WhileStatement | RepeatStatement | ForStatement].
 
 9.1. Assignments
-The assignment serves to replace the current value of a variable by a new value specified by an
-expression. The assignment operator is written as ":=" and pronounced as becomes.
-         assignment = designator ":=" expression.
+
 
 
                                                                                                         8
- If a value parameter is structured (of array or record type), no assignment to it or to its elements are
+ The assignment serves to replace the current value of a variable by a new value specified by an
+expression. The assignment operator is written as ":=" and pronounced as becomes.
+        assignment = designator ":=" expression.
+If a value parameter is structured (of array or record type), no assignment to it or to its elements are
 permitted. Neither may assignments be made to imported variables.
 The type of the expression must be the same as that of the designator. The following exceptions
 hold:
@@ -446,15 +450,15 @@ which are separated by semicolons.
         StatementSequence = statement {";" statement}.
 
 9.4. If statements
-        IfStatement = IF expression THEN StatementSequence
-               {ELSIF expression THEN StatementSequence}
-               [ELSE StatementSequence]
-               END.
 
 
 
                                                                                                             9
- If statements specify the conditional execution of guarded statements. The Boolean expression
+        IfStatement = IF expression THEN StatementSequence
+              {ELSIF expression THEN StatementSequence}
+              [ELSE StatementSequence]
+              END.
+If statements specify the conditional execution of guarded statements. The Boolean expression
 preceding a statement is called its guard. The guards are evaluated in sequence of occurrence,
 until one evaluates to TRUE, whereafter its associated statement sequence is executed. If no guard
 is satisfied, the statement sequence following the symbol ELSE is executed, if there is one.
@@ -499,14 +503,15 @@ Examples:
        ELSIF n > m DO n := n – m
        END
 
-9.7. Repeat Statements
-A repeat statement specifies the repeated execution of a statement sequence until a condition is
-satisfied. The statement sequence is executed at least once.
-       RepeatStatement = REPEAT StatementSequence UNTIL expression.
 
 
                                                                                                      10
- 9.8. For statements
+ 9.7. Repeat Statements
+A repeat statement specifies the repeated execution of a statement sequence until a condition is
+satisfied. The statement sequence is executed at least once.
+         RepeatStatement = REPEAT StatementSequence UNTIL expression.
+
+9.8. For statements
 A for statement specifies the repeated execution of a statement sequence for a given number of
 times, while a progression of values is assigned to an integer variable called the control variable of
 the for statement.
@@ -547,16 +552,14 @@ procedure.
          ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
                  [RETURN expression] END.
          DeclarationSequence = [CONST {ConstDeclaration ";"}]
-                 [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
-                 {ProcedureDeclaration ";"}.
-
-10.1. Formal parameters
-
-
 
 
                                                                                                            11
- Formal parameters are identifiers which denote actual parameters specified in the procedure call.
+                 [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
+                {ProcedureDeclaration ";"}.
+
+10.1. Formal parameters
+Formal parameters are identifiers which denote actual parameters specified in the procedure call.
 The correspondence between formal and actual parameters is established when the procedure is
 called. There are two kinds of parameters, namely value and variable parameters. A variable
 parameter corresponds to an actual parameter that is a variable, and it stands for that variable. A
@@ -600,15 +603,17 @@ Examples of procedure declarations:
            REPEAT DEC(i); Write(CHR(buf[i] + ORD("0"))) UNTIL i = 0
         END WriteInt
         PROCEDURE log2(x: INTEGER): INTEGER;
-           VAR y: INTEGER; (*assume x>0*)
+
+
+
+                                                                                                       12
+            VAR y: INTEGER; (*assume x>0*)
         BEGIN y := 0;
            WHILE x > 1 DO x := x DIV 2; INC(y) END ;
            RETURN y
         END log2
 
-
-                                                                                                       12
- 10.2. Predefined procedures
+10.2. Predefined procedures
 The following table lists the predefined procedures. Some are generic procedures, i.e. they apply
 to several types of operands. v stands for a variable, x and n for expressions, and T for a type.
 Function procedures:
@@ -647,16 +652,15 @@ UNPK is the reverse operation. The resulting x is normalized, such that 1.0 <= x
 A module is a collection of declarations of constants, types, variables, and procedures, and a
 sequence of statements for the purpose of assigning initial values to the variables. A module
 typically constitutes a text that is compilable as a unit.
-        module       = MODULE ident ";" [ImportList ";"] DeclarationSequence
-                      [BEGIN StatementSequence] END ident "." .
-        ImportList   = IMPORT import {"," import} ";" .
-        Import       = ident [":=" ident].
-
 
 
 
                                                                                                     13
- The import list specifies the modules of which the module is a client. If an identifier x is exported
+         module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
+                       [BEGIN StatementSequence] END ident "." .
+        ImportList    = IMPORT import {"," import} ";" .
+        Import        = ident [":=" ident].
+The import list specifies the modules of which the module is a client. If an identifier x is exported
 from a module M, and if M is listed in a module's import list, then x is referred to as M.x. If the form
 "M := M1" is used in the import list, an exported object x declared within M1 is referenced in the
 importing module as M.x .
@@ -704,15 +708,13 @@ Function procedures:
         Name               Argument types          Result type              Function
         ADR(v)             any                     INTEGER                  address of variable v
         SIZE(T)            any type                INTEGER                  size in bytes
-        BIT(a, n)          a, n: INTEGER           BOOLEAN                  bit n of mem[a]
-
-Proper procedures:
-
-
 
 
                                                                                                            14
-         Name            Argument types                          Function
+         BIT(a, n)       a, n: INTEGER       BOOLEAN             bit n of mem[a]
+
+Proper procedures:
+        Name            Argument types                          Function
         GET(a, v)      a: INTEGER; v: any basic type      v := mem[a]
         PUT(a, x)      a: INTEGER; x: any basic type      mem[a] := x
         COPY(src, dst, n) all INTEGER copy n consecutive words from src to dst
