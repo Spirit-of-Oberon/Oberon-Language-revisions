@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                Revision 1.10.2013 / 15.2.2016
+                                 Revision 1.10.2013 / 4.3.2016
                                             Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -363,8 +363,8 @@ When used with a single operand of type SET, the minus sign denotes the set comp
           IN          set membership
           IS          type test
 Relations are Boolean. The ordering relations <, <=, >, >= apply to the numeric types, CHAR, and
-character arrays. The relations = and # also apply to the type SET, and to pointer and procedure
-types.
+character arrays. The relations = and # also apply to the types BOOLEAN, SET, and to pointer and
+procedure types.
 x IN s stands for "x is an element of s". x must be of type INTEGER, and s of type SET.
 v IS T stands for "v is of type T" and is called a type test. It is applicable, if
          1. T is an extension of the declared type T0 of v, and if
