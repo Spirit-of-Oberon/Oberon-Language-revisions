@@ -1,11 +1,11 @@
                    The Programming Language Oberon
-                                        Revision 1.7.2012
+                                       Revision 1.10.2013
                                              Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
 
 Table of Contents
-      1. Introduction
+      1. History and introduction
       2. Syntax
       3. Vocabulary
       4. Declarations and scope rules
@@ -68,32 +68,32 @@ unless it contains a scale factor with the letter D, in which case it is of type
         digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
 Examples:
         1987
-        100H                     = 256
+        100H                    = 256
         12.3
-        4.567E8                  = 456700000
+        4.567E8                 = 456700000
 Strings are sequences of characters enclosed in quote marks ("). A string cannot contain the
 delimiting quote mark. Alternatively, a single-character string may be specified by the ordinal
 number of the character in hexadecimal notation followed by an "X". The number of characters in a
 string is called the length of the string.
         string = """ {character} """ | digit {hexdigit} "X" .
 Examples:
-        "OBERON"                 "Don't worry!"             22X
+        "OBERON"                "Don't worry!"              22X
 Operators and delimiters are the special characters, character pairs, or reserved words listed
 below. These reserved words consist exclusively of capital letters and cannot be used in the role of
 identifiers.
-          +        :=         ARRAY            IMPORT                THEN
-          -        ^          BEGIN            IN                    TO
-          *        =          BY               IS                    TRUE
-          /        #          CASE             MOD                   TYPE
-          ~        <          CONST            MODULE                UNTIL
-          &        >          DIV              NIL                   VAR
-          .        <=         DO               OF                    WHILE
-          ,        >=         ELSE             OR
-          ;        ..         ELSIF            POINTER
-          |        :          END              PROCEDURE
-          (        )          FALSE            RECORD
-          [        ]          FOR              REPEAT
-          {        }          IF               RETURN
+         +         :=         ARRAY            IMPORT                THEN
+         -         ^          BEGIN            IN                    TO
+         *         =          BY               IS                    TRUE
+         /         #          CASE             MOD                   TYPE
+         ~         <          CONST            MODULE                UNTIL
+         &         >          DIV              NIL                   VAR
+         .         <=         DO               OF                    WHILE
+         ,         >=         ELSE             OR
+         ;         ..         ELSIF            POINTER
+         |         :          END              PROCEDURE
+         (         )          FALSE            RECORD
+         [         ]          FOR              REPEAT
+         {         }          IF               RETURN
 Comments may be inserted between any two symbols in a program. They are arbitrary character
 sequences opened by the bracket (* and closed by *). Comments do not affect the meaning of a
 program. They may be nested.
@@ -123,12 +123,11 @@ together are called a qualified identifier.
         identdef = ident ["*"].
 The following identifiers are predefined; their meaning is defined in section 6.1 (types) or 10.2
 (procedures):
-        ABS               ASR              ASSERT            BOOLEAN           CHAR
-        CHR               COPY             DEC               EXCL              FLOOR
-        FLT               INC              INCL              INTEGER           LEN
-        LSL               LONG             LONGREAL          NEW               ODD
-        ORD               PACK             REAL              ROR               SET
-        SHORT             UNPK
+        ABS               ASR              ASSERT            BOOLEAN          BYTE
+        CHAR              CHR              DEC               EXCL             FLOOR
+        FLT               INC              INCL              INTEGER          LEN
+        LSL               NEW              ODD               ORD              PACK
+        REAL              ROR              SET               UNPK
 
 5. Constant declarations
 A constant declaration associates an identifier with a constant value.
@@ -149,12 +148,12 @@ applicable to components. There are two different structures, namely arrays and 
 different component selectors.
         TypeDeclaration = identdef "=" StrucType.
         StrucType = ArrayType | RecordType | PointerType | ProcedureType.
+        type = qualident | StrucType.
 
 
 
                                                                                                           3
-         type = qualident | StrucType.
-Examples:
+ Examples:
         Table          =      ARRAY N OF REAL
         Tree           =      POINTER TO Node
         Node           =      RECORD key: INTEGER;
@@ -199,11 +198,11 @@ A record type is a structure consisting of a fixed number of elements of possibl
 record type declaration specifies for each element, called field, its type and an identifier which
 denotes the field. The scope of these field identifiers is the record definition itself, but they are also
 visible within field designators (see 8.1) referring to elements of record variables.
+        RecordType         = RECORD ["(" BaseType ")"] [FieldListSequence] END.
 
 
                                                                                                              4
-         RecordType     = RECORD ["(" BaseType ")"] [FieldListSequence] END.
-        BaseType       = qualident.
+         BaseType       = qualident.
         FieldListSequence = FieldList {";" FieldList}.
         FieldList      = IdentList ":" type.
         IdentList      = identdef {"," identdef}.
@@ -247,24 +246,23 @@ standard procedure.
 Variable declarations serve to introduce variables and associate them with identifiers that must be
 unique within the given scope. They also serve to associate fixed data types with the variables.
         VariableDeclaration = IdentList ":" type.
-
+Variables whose identifiers appear in the same list are all of the same type. Examples of variable
+declarations (refer to examples in Ch. 6):
 
 
 
                                                                                                              5
- Variables whose identifiers appear in the same list are all of the same type. Examples of variable
-declarations (refer to examples in Ch. 6):
          i, j, k:   INTEGER
-         x, y:      REAL
-         p, q:      BOOLEAN
-         s:         SET
-         f:         Function
-         a:         ARRAY 100 OF REAL
-         w:         ARRAY 16 OF
-                          RECORD ch: CHAR;
-                              count: INTEGER
-                          END
-         t:         Tree
+        x, y:      REAL
+        p, q:      BOOLEAN
+        s:         SET
+        f:         Function
+        a:         ARRAY 100 OF REAL
+        w:         ARRAY 16 OF
+                         RECORD ch: CHAR;
+                             count: INTEGER
+                         END
+        t:         Tree
 
 8. Expressions
 Expressions are constructs denoting rules of computation whereby constants and current values of
@@ -284,8 +282,8 @@ referenced by p. If r designates a record, then r.f denotes the field f of r. If
 p.f denotes the field f of the record p^, i.e. the dot implies dereferencing and p.f stands for p^.f.
 The typeguard v(T0) asserts that v is of type T0, i.e. it aborts program execution, if it is not of type
 T0. The guard is applicable, if
-1.T0 is an extension of the declared type T of v, and if
-2.v is a variable parameter of record type, or v is a pointer.
+1. T0 is an extension of the declared type T of v, and if
+2. v is a variable parameter of record type, or v is a pointer.
   designator = qualident {selector}.
   selector = "." ident | "[" ExpList "]" | "^" | "(" qualident ")".
   ExpList = expression {"," expression}.
@@ -295,18 +293,20 @@ a (possibly empty) parameter list, the designator implies an activation of the p
 for the value resulting from its execution. The (types of the) actual parameters must correspond to
 the formal parameters as specified in the procedure's declaration (see Ch. 10).
 Examples of designators (see examples in Ch. 7):
-         i                               (INTEGER)
-         a[i]                            (REAL)
-         w[3].ch                         (CHAR)
-         t.key                           (INTEGER)
-         t.left.right                    (Tree)
-         t(CenterNode).subnode           (Tree)
+        i                                (INTEGER)
+        a[i]                             (REAL)
+        w[3].ch                          (CHAR)
+        t.key                            (INTEGER)
+        t.left.right                     (Tree)
+        t(CenterNode).subnode            (Tree)
+
+8.2. Operators
+
 
 
 
                                                                                                              6
- 8.2. Operators
-The syntax of expressions distinguishes between four classes of operators with different
+ The syntax of expressions distinguishes between four classes of operators with different
 precedences (binding strengths). The operator ~ has the highest precedence, followed by
 multiplication operators, addition operators, and relations. Operators of the same precedence
 associate from left to right. For example, x−y−z stands for (x−y)−z.
@@ -346,17 +346,16 @@ same type, which is also the type of the result. When used as unary operators, �
 inversion and + denotes the identity operation.
 The operators DIV and MOD apply to integer operands only. Let q = x DIV y, and r = x MOD y.
 Then quotient q and remainder r are defined by the equation
-        x = q*y + r              0≤r<y
-
+        x = q*y + r              0 <= r < y
 8.2.3. Set operators
         symbol      result
+         +          union
+         −          difference
 
 
 
                                                                                                    7
-           +           union
-          −           difference
-          *           intersection
+           *           intersection
           /           symmetric set difference
 When used with a single operand of type SET, the minus sign denotes the set complement.
 8.2.4. Relations
@@ -401,11 +400,13 @@ empty statement is included in order to relax punctuation rules in statement seq
     statement = [assignment | ProcedureCall | IfStatement | CaseStatement |
         WhileStatement | RepeatStatement | ForStatement].
 
+9.1. Assignments
+
+
 
 
                                                                                                         8
- 9.1. Assignments
-The assignment serves to replace the current value of a variable by a new value specified by an
+ The assignment serves to replace the current value of a variable by a new value specified by an
 expression. The assignment operator is written as ":=" and pronounced as becomes.
         assignment = designator ":=" expression.
 If a value parameter is structured (of array or record type), no assignment to it or to its elements are
@@ -451,65 +452,64 @@ Statement sequences denote the sequence of actions specified by the component st
 which are separated by semicolons.
         StatementSequence = statement {";" statement}.
 
+9.4. If statements
 
 
 
                                                                                                             9
- 9.4. If statements
         IfStatement = IF expression THEN StatementSequence
-               {ELSIF expression THEN StatementSequence}
-               [ELSE StatementSequence]
-               END.
+              {ELSIF expression THEN StatementSequence}
+              [ELSE StatementSequence]
+              END.
 If statements specify the conditional execution of guarded statements. The Boolean expression
 preceding a statement is called its guard. The guards are evaluated in sequence of occurrence,
 until one evaluates to TRUE, whereafter its associated statement sequence is executed. If no guard
 is satisfied, the statement sequence following the symbol ELSE is executed, if there is one.
 Example:
-        IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
-        ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
-        ELSIF ch = 22X THEN ReadString
-        END
+       IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
+       ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
+       ELSIF ch = 22X THEN ReadString
+       END
 
 9.5. Case statements
 Case statements specify the selection and execution of a statement sequence according to the
 value of an expression. First the case expression is evaluated, then the statement sequence is
 executed whose case label list contains the obtained value. The case expression must be of type
 INTEGER or CHAR, and all labels must be integers or single-character strings, respectively.
-   CaseStatement     =    CASE expression OF case {"|" case} END.
-   case              =    [CaseLabelList ":" StatementSequence].
-   CaseLabelList     =    LabelRange {"," LabelRange}.
-   LabelRange        =    label [".." label].
-   label             =    integer | string | ident.
+   CaseStatement    =   CASE expression OF case {"|" case} END.
+   case             =   [CaseLabelList ":" StatementSequence].
+   CaseLabelList    =   LabelRange {"," LabelRange}.
+   LabelRange       =   label [".." label].
+   label            =   integer | string | ident.
 Example:
-        CASE k OF
-             0: x := x + y
-           | 1: x := x − y
-           | 2: x := x * y
-           | 3: x := x / y
-        END
+       CASE k OF
+            0: x := x + y
+          | 1: x := x − y
+          | 2: x := x * y
+          | 3: x := x / y
+       END
 
 9.6. While statements
 While statements specify repetition. If any of the Boolean expressions (guards) yields TRUE, the
 corresponding statement sequence is executed. The expression evaluation and the statement
 execution are repeated until none of the Boolean expressions yields TRUE.
-        WhileStatement = WHILE expression DO StatementSequence
-               {ELSIF expression DO StatementSequence} END.
+       WhileStatement = WHILE expression DO StatementSequence
+              {ELSIF expression DO StatementSequence} END.
 Examples:
-        WHILE j > 0 DO
-           j := j DIV 2; i := i+1
-        END
-        WHILE (t # NIL) & (t.key # i) DO
-           t := t.left
-        END
-        WHILE m > n DO m := m – n
-        ELSIF n > m DO n := n – m
+       WHILE j > 0 DO
+          j := j DIV 2; i := i+1
+       END
+       WHILE (t # NIL) & (t.key # i) DO
+          t := t.left
+       END
+       WHILE m > n DO m := m – n
+       ELSIF n > m DO n := n – m
+       END
 
 
 
                                                                                                      10
-          END
-
-9.7. Repeat Statements
+ 9.7. Repeat Statements
 A repeat statement specifies the repeated execution of a statement sequence until a condition is
 satisfied. The statement sequence is executed at least once.
          RepeatStatement = REPEAT StatementSequence UNTIL expression.
@@ -546,21 +546,19 @@ procedure.
 All constants, variables, types, and procedures declared within a procedure body are local to the
 procedure. The values of local variables are undefined upon entry to the procedure. Since
 procedures may be declared as local objects too, procedure declarations may be nested.
-In addition to its formal parameters and locally declared objects, the objects declared in the
-environment of the procedure are also visible in the procedure (with the exception of variables and
-of those objects that have the same name as an object declared locally).
+In addition to its formal parameters and locally declared objects, the objects declared globally are
+also visible in the procedure.
 The use of the procedure identifier in a call within its declaration implies recursive activation of the
 procedure.
          ProcedureDeclaration = ProcedureHeading ";" ProcedureBody ident.
          ProcedureHeading = PROCEDURE identdef [FormalParameters].
-
+         ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
+                 [RETURN expression] END.
+         DeclarationSequence = [CONST {ConstantDeclaration ";"}]
 
 
                                                                                                            11
-         ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
-                [RETURN expression] END.
-        DeclarationSequence = [CONST {ConstantDeclaration ";"}]
-                [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
+                 [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
                 {ProcedureDeclaration ";"}.
 
 10.1. Formal parameters
@@ -606,63 +604,62 @@ Examples of procedure declarations:
         BEGIN i := 0;
            REPEAT buf[i] := x MOD 10; x := x DIV 10; INC(i) UNTIL x = 0;
            REPEAT DEC(i); Write(CHR(buf[i] + ORD("0"))) UNTIL i = 0
+        END WriteInt
+        PROCEDURE log2(x: INTEGER): INTEGER;
+
 
 
                                                                                                        12
-        END WriteInt
-       PROCEDURE log2(x: INTEGER): INTEGER;
-          VAR y: INTEGER; (*assume x>0*)
-       BEGIN y := 0;
-          WHILE x > 1 DO x := x DIV 2; INC(y) END ;
-          RETURN y
-       END log2
+            VAR y: INTEGER; (*assume x>0*)
+        BEGIN y := 0;
+           WHILE x > 1 DO x := x DIV 2; INC(y) END ;
+           RETURN y
+        END log2
 
 10.2. Predefined procedures
 The following table lists the predefined procedures. Some are generic procedures, i.e. they apply
 to several types of operands. v stands for a variable, x and n for expressions, and T for a type.
 Function procedures:
-       Name            Argument type              Result type    Function
-       ABS(x)          numeric type               type of x      absolute value
-       ODD(x)          INTEGER                    BOOLEAN        x MOD 2 = 1
-       LEN(v)          v: array                   INTEGER        the length of v
-       LSL(x, n)       x: INTEGER                 type of x      logical shift left, x * 2n
-       ASR(x, n)       x: INTEGER                 type of x      signed shift right, x DIV 2n
-       ROR(x, n)       x: INTEGER                 type of x      x rotated right by n bits
+        Name            Argument type               Result type    Function
+        ABS(x)          x: numeric type             type of x      absolute value
+        ODD(x)          x: INTEGER                  BOOLEAN        x MOD 2 = 1
+        LEN(v)          v: array                    INTEGER        the length of v
+        LSL(x, n)       x, n: INTEGER               INTEGER        logical shift left, x * 2n
+        ASR(x, n)       x, n: INTEGER               INTEGER        signed shift right, x DIV 2n
+        ROR(x, n)       x, n: INTEGER               INTEGER        x rotated right by n bits
 Type conversion functions:
-       Name            Argument type              Result type    Function
-       FLOOR(x)        REAL                       INTEGER        largest integer ≤ x
-       FLT(x)          INTEGER, BYTE              REAL           identity
-       ORD(x)          CHAR, BOOLEAN, SET         INTEGER        ordinal number of x
-       CHR(x)          INTEGER                    CHAR           character with ordinal number x
+        Name            Argument type               Result type    Function
+        FLOOR(x)        REAL                        INTEGER        truncation
+        FLT(x)          INTEGER                     REAL           identity
+        ORD(x)          CHAR, BOOLEAN, SET          INTEGER        ordinal number of x
+        CHR(x)          INTEGER                     CHAR           character with ordinal number x
 
 Proper procedures:
-       Name            Argument types             Function
-       INC(v)          INTEGER                    v := v + 1
-       INC(v, n)       INTEGER                    v := v + n
-       DEC(v)          INTEGER                    v := v - 1
-       DEC(v, n)       INTEGER                    v := v - n
-       INCL(v, x)      v: SET; x: INTEGER         v := v + {x}
-       EXCL(v, x)      v: SET; x: INTEGER         v := v - {x}
-       COPY(x, v)      x: character array, string v := x
-                       v: character array
-       NEW(v)          pointer type               allocate v^
-       ASSERT(b)    BOOLEAN                       abort, if ~b
-       ASSERT(b, n) BOOLEAN, INTEGER
-       PACK(x, y)      REAL; INTEGER              pack x and y into x
-       UNPK(x, y)      REAL; INTEGER              unpack x into x and y
-Procedures INC and DEC may have an explicit increment or decrement. It must be a constant. Also
-for INCL and EXCL, x must be a constant. The second parameter n of ASSERT is a value
-transmitted to the system as an abort parameter.
-The parameter y of PACK represents the exponent of x. PACK(x, y) is equivalent to x := x * 2 y.
-UNPK is the reverse operation of PACK. The resulting x is normalized, i.e. 1.0 <= x < 2.0.
+        Name            Argument types              Function
+        INC(v)          INTEGER                     v := v + 1
+        INC(v, n)       INTEGER                     v := v + n
+        DEC(v)          INTEGER                     v := v - 1
+        DEC(v, n)       INTEGER                     v := v - n
+        INCL(v, x)      v: SET; x: INTEGER          v := v + {x}
+        EXCL(v, x)      v: SET; x: INTEGER          v := v - {x}
+        NEW(v)           pointer type               allocate v^
+        ASSERT(b)       BOOLEAN                     abort, if ~b
+        PACK(x, n)      REAL; INTEGER               pack x and n into x
+        UNPK(x, n)      REAL; INTEGER               unpack x into x and n
+The function FLOOR(x) truncates x. Its fractional part is discarded.
+        FLOOR(1.5) = 1             FLOOR(-1.5) = -2
+The parameter n of PACK represents the exponent of x. PACK(x, y) is equivalent to x := x * 2y.
+UNPK is the reverse operation. The resulting x is normalized, such that 1.0 <= x < 2.0.
 
-
-                                                                                                    13
- 11. Modules
+11. Modules
 A module is a collection of declarations of constants, types, variables, and procedures, and a
 sequence of statements for the purpose of assigning initial values to the variables. A module
 typically constitutes a text that is compilable as a unit.
-        module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
+
+
+
+                                                                                                     13
+         module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
                        [BEGIN StatementSequence] END ident "." .
         ImportList    = IMPORT import {"," import} ";" .
         Import        = ident [":=" ident].
@@ -705,80 +702,81 @@ perhaps facilities to break the data type compatibility rules otherwise imposed 
 definition. It is strongly recommended to restrict their use to specific low-level modules, as such
 modules are inherently non-portable and not "type-safe". However, they are easily recognized due
 to the identifier SYSTEM appearing in their import lists. The subsequent definitions are generally
-applicable. However, individual implementations may include in their module S YSTEM additional
+applicable. However, individual implementations may include in their module SYSTEM additional
 definitions that are particular to the specific, underlying computer. In the following, v stands for a
 variable, x, a, and n for expressions.
 Function procedures:
+        Name               Argument types          Result type              Function
+        ADR(v)             any                     INTEGER                  address of variable v
+        SIZE(T)            any type                INTEGER                  size in bytes
+        BIT(a, n)          a, n: INTEGER           BOOLEAN                  bit n of mem[a]
 
 
 
 
                                                                                                            14
-        Name                Argument types          Result type            Function
-       ADR(v)              any                     INTEGER                address of variable v
-       SIZE(T)             any type                INTEGER                size in bytes
-       BIT(a, n)           a, n: INTEGER           BOOLEAN                bit n of mem[a]
-
-Proper procedures:
-       Name                Argument types                                 Function
+ Proper procedures:
+       Name          Argument types                        Function
        GET(a, v)      a: INTEGER; v: any basic type      v := mem[a]
        PUT(a, x)      a: INTEGER; x: any basic type      mem[a] := x
        COPY(src, dst, n) all INTEGER copy n consecutive words from src to dst
 
 
-Appendix
+
+
+                                                                                15
+ Appendix
 The Syntax of Oberon
-     letter = "A" | "B" | … | "Z" | "a" | "b" | … | "z".
-     digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
-     hexDigit = digit | "A" | "B" | "C" | "D" | "E" | "F".
-     ident = letter {letter | digit}.
-     qualident = [ident "."] ident.
-     identdef = ident ["*"].
-     integer = digit {digit} | digit {hexDigit} "H".
-     real = digit {digit} "." {digit} [ScaleFactor].
-     ScaleFactor = ("E" | "D") ["+" | "-"] digit {digit}.
-     number = integer | real.
-     string = """ {character} """ | digit {hexDigit} "X".
-     ConstantDeclaration = identdef "=" ConstExpression.
-     ConstExpression = expression.
-     TypeDeclaration = identdef "=" StrucType.
-     StrucType = ArrayType | RecordType | PointerType | ProcedureType.
-     type = qualident | StrucType.
-     ArrayType = ARRAY length {"," length} OF type.
-     length = ConstExpression.
-     RecordType = RECORD ["(" BaseType ")"] [FieldListSequence] END.
-     BaseType = qualident.
-     FieldListSequence = FieldList {";" FieldList}.
-     FieldList = IdentList ":" type.
-     IdentList = identdef {"," identdef}.
-     PointerType = POINTER TO type.
-     ProcedureType = PROCEDURE [FormalParameters].
-     VariableDeclaration = IdentList ":" type.
-     expression = SimpleExpression [relation SimpleExpression].
-     relation = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
-     SimpleExpression = ["+" | "-"] term {AddOperator term}.
-     AddOperator = "+" | "-" | OR.
-     term = factor {MulOperator factor}.
-     MulOperator = "*" | "/" | DIV | MOD | "&".
-     factor = number | string | NIL | TRUE | FALSE |
-       set | designator [ActualParameters] | "(" expression ")" | "~" factor.
-     designator = qualident {selector}.
+    letter = "A" | "B" | … | "Z" | "a" | "b" | … | "z".
+    digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
+    hexDigit = digit | "A" | "B" | "C" | "D" | "E" | "F".
+    ident = letter {letter | digit}.
+    qualident = [ident "."] ident.
+    identdef = ident ["*"].
+    integer = digit {digit} | digit {hexDigit} "H".
+    real = digit {digit} "." {digit} [ScaleFactor].
+    ScaleFactor = ("E" | "D") ["+" | "-"] digit {digit}.
+    number = integer | real.
+    string = """ {character} """ | digit {hexDigit} "X".
+    ConstantDeclaration = identdef "=" ConstExpression.
+    ConstExpression = expression.
+    TypeDeclaration = identdef "=" StrucType.
+    StrucType = ArrayType | RecordType | PointerType | ProcedureType.
+    type = qualident | StrucType.
+    ArrayType = ARRAY length {"," length} OF type.
+    length = ConstExpression.
+    RecordType = RECORD ["(" BaseType ")"] [FieldListSequence] END.
+    BaseType = qualident.
+    FieldListSequence = FieldList {";" FieldList}.
+    FieldList = IdentList ":" type.
+    IdentList = identdef {"," identdef}.
+    PointerType = POINTER TO type.
+    ProcedureType = PROCEDURE [FormalParameters].
+    VariableDeclaration = IdentList ":" type.
+    expression = SimpleExpression [relation SimpleExpression].
+    relation = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
+    SimpleExpression = ["+" | "-"] term {AddOperator term}.
+    AddOperator = "+" | "-" | OR.
+    term = factor {MulOperator factor}.
+    MulOperator = "*" | "/" | DIV | MOD | "&".
+    factor = number | string | NIL | TRUE | FALSE |
+      set | designator [ActualParameters] | "(" expression ")" | "~" factor.
+    designator = qualident {selector}.
+    selector = "." ident | "[" ExpList "]" | "^" | "(" qualident ")".
+    set = "{" [element {"," element}] "}".
+    element = expression [".." expression].
+    ExpList = expression {"," expression}.
+    ActualParameters = "(" [ExpList] ")" .
+    statement = [assignment | ProcedureCall | IfStatement | CaseStatement |
+       WhileStatement | RepeatStatement | ForStatement].
+    assignment = designator ":=" expression.
+    ProcedureCall = designator [ActualParameters].
+    StatementSequence = statement {";" statement}.
+    IfStatement = IF expression THEN StatementSequence
+       {ELSIF expression THEN StatementSequence}
 
 
-
-                                                                                                  15
- selector = "." ident | "[" ExpList "]" | "^" | "(" qualident ")".
-set = "{" [element {"," element}] "}".
-element = expression [".." expression].
-ExpList = expression {"," expression}.
-ActualParameters = "(" [ExpList] ")" .
-statement = [assignment | ProcedureCall | IfStatement | CaseStatement |
-   WhileStatement | RepeatStatement | ForStatement].
-assignment = designator ":=" expression.
-ProcedureCall = designator [ActualParameters].
-StatementSequence = statement {";" statement}.
-IfStatement = IF expression THEN StatementSequence
-   {ELSIF expression THEN StatementSequence}
+                                                                               16
    [ELSE StatementSequence] END.
 CaseStatement = CASE expression OF case {"|" case} END.
 case = [CaseLabelList ":" StatementSequence].
@@ -786,10 +784,10 @@ CaseLabelList = LabelRange {"," LabelRange}.
 LabelRange = label [".." label].
 label = integer | string | ident.
 WhileStatement = WHILE expression DO StatementSequence
-   {ELSIF expression DO StatementSequence} END.
+  {ELSIF expression DO StatementSequence} END.
 RepeatStatement = REPEAT StatementSequence UNTIL expression.
 ForStatement = FOR ident ":=" expression TO expression [BY ConstExpression]
-   DO StatementSequence END.
+  DO StatementSequence END.
 ProcedureDeclaration = ProcedureHeading ";" ProcedureBody ident.
 ProcedureHeading = PROCEDURE identdef [FormalParameters].
 ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
@@ -809,5 +807,5 @@ import = ident [":=" ident].
 
 
 
-                                                                              16
+                                                                              17
  
