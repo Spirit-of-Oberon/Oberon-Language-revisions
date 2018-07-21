@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                 Revision 1.10.2013 / 1.5.2016
+                                 Revision 1.10.2013 / 3.5.2016
                                             Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -674,7 +674,7 @@ UNPK is the reverse operation. The resulting x is normalized, such that 1.0 <= x
 A module is a collection of declarations of constants, types, variables, and procedures, and a
 sequence of statements for the purpose of assigning initial values to the variables. A module
 typically constitutes a text that is compilable as a unit.
-        module        = MODULE ident ";" [ImportList ";"] DeclarationSequence
+        module        = MODULE ident ";" [ImportList] DeclarationSequence
                        [BEGIN StatementSequence] END ident "." .
         ImportList    = IMPORT import {"," import} ";" .
         Import        = ident [":=" ident].
@@ -763,7 +763,7 @@ The Syntax of Oberon
     identdef = ident ["*"].
     integer = digit {digit} | digit {hexDigit} "H".
     real = digit {digit} "." {digit} [ScaleFactor].
-    ScaleFactor = ("E" | "D") ["+" | "-"] digit {digit}.
+    ScaleFactor = "E" ["+" | "-"] digit {digit}.
     number = integer | real.
     string = """ {character} """ | digit {hexDigit} "X".
     ConstDeclaration = identdef "=" ConstExpression.
