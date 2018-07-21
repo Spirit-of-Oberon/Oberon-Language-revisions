@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                        Revision 22.9.2011
+                                        Revision 1.7.2012
                                              Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -68,32 +68,32 @@ unless it contains a scale factor with the letter D, in which case it is of type
         digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
 Examples:
         1987
-        100H                    = 256
+        100H                     = 256
         12.3
-        4.567E8                 = 456700000
+        4.567E8                  = 456700000
 Strings are sequences of characters enclosed in quote marks ("). A string cannot contain the
 delimiting quote mark. Alternatively, a single-character string may be specified by the ordinal
 number of the character in hexadecimal notation followed by an "X". The number of characters in a
 string is called the length of the string.
         string = """ {character} """ | digit {hexdigit} "X" .
 Examples:
-        "OBERON"                "Don't worry!"              22X
+        "OBERON"                 "Don't worry!"             22X
 Operators and delimiters are the special characters, character pairs, or reserved words listed
 below. These reserved words consist exclusively of capital letters and cannot be used in the role of
 identifiers.
-         +         :=         ARRAY            IMPORT                THEN
-         -         ^          BEGIN            IN                    TO
-         *         =          BY               IS                    TRUE
-         /         #          CASE             MOD                   TYPE
-         ~         <          CONST            MODULE                UNTIL
-         &         >          DIV              NIL                   VAR
-         .         <=         DO               OF                    WHILE
-         ,         >=         ELSE             OR
-         ;         ..         ELSIF            POINTER
-         |         :          END              PROCEDURE
-         (         )          FALSE            RECORD
-         [         ]          FOR              REPEAT
-         {         }          IF               RETURN
+          +        :=         ARRAY            IMPORT                THEN
+          -        ^          BEGIN            IN                    TO
+          *        =          BY               IS                    TRUE
+          /        #          CASE             MOD                   TYPE
+          ~        <          CONST            MODULE                UNTIL
+          &        >          DIV              NIL                   VAR
+          .        <=         DO               OF                    WHILE
+          ,        >=         ELSE             OR
+          ;        ..         ELSIF            POINTER
+          |        :          END              PROCEDURE
+          (        )          FALSE            RECORD
+          [        ]          FOR              REPEAT
+          {        }          IF               RETURN
 Comments may be inserted between any two symbols in a program. They are arbitrary character
 sequences opened by the bracket (* and closed by *). Comments do not affect the meaning of a
 program. They may be nested.
@@ -123,11 +123,11 @@ together are called a qualified identifier.
         identdef = ident ["*"].
 The following identifiers are predefined; their meaning is defined in section 6.1 (types) or 10.2
 (procedures):
-        ABS               ASR              ASSERT            BOOLEAN          CHAR
-        CHR               COPY             DEC               EXCL             FLOOR
-        FLT               INC              INCL              INTEGER          LEN
-        LSL               LONG             LONGREAL          NEW              ODD
-        ORD               PACK             REAL              ROR              SET
+        ABS               ASR              ASSERT            BOOLEAN           CHAR
+        CHR               COPY             DEC               EXCL              FLOOR
+        FLT               INC              INCL              INTEGER           LEN
+        LSL               LONG             LONGREAL          NEW               ODD
+        ORD               PACK             REAL              ROR               SET
         SHORT             UNPK
 
 5. Constant declarations
@@ -155,16 +155,16 @@ different component selectors.
                                                                                                           3
          type = qualident | StrucType.
 Examples:
-        Table         =       ARRAY N OF REAL
-        Tree          =       POINTER TO Node
-        Node          =       RECORD key: INTEGER;
+        Table          =      ARRAY N OF REAL
+        Tree           =      POINTER TO Node
+        Node           =      RECORD key: INTEGER;
                                   left, right: Tree
                               END
         CenterNode =          RECORD (Node)
                                   name: ARRAY 32 OF CHAR;
                                   subnode: Tree
                               END
-        Function      =       PROCEDURE (x: INTEGER): INTEGER
+        Function       =      PROCEDURE (x: INTEGER): INTEGER
 6.1. Basic types
 The following basic types are denoted by predeclared identifiers. The associated operators are
 defined in 8.2, and the predeclared function procedures in 10.2. The values of a given basic type
@@ -173,10 +173,9 @@ are the following:
         CHAR                the characters of a standard character set
         INTEGER             the integers
         REAL                real numbers
-        LONGREAL            real numbers
+        BYTE                the integers between 0 and 255
         SET                 the sets of integers between 0 and 31
-The type LONGREAL is intended to represent real numbers with a higher number of digits than
-REAL. However, the two types may be identical.
+The type BYTE is compatible with the type INTEGER, and vice-versa.
 
 6.2. Array types
 An array is a structure consisting of a fixed number of elements which are all of the same type,
@@ -198,13 +197,12 @@ Examples of array types:
 6.3. Record types
 A record type is a structure consisting of a fixed number of elements of possibly different types. The
 record type declaration specifies for each element, called field, its type and an identifier which
-
-
-
-                                                                                                         4
- denotes the field. The scope of these field identifiers is the record definition itself, but they are also
+denotes the field. The scope of these field identifiers is the record definition itself, but they are also
 visible within field designators (see 8.1) referring to elements of record variables.
-        RecordType     = RECORD ["(" BaseType ")"] [FieldListSequence] END.
+
+
+                                                                                                             4
+         RecordType     = RECORD ["(" BaseType ")"] [FieldListSequence] END.
         BaseType       = qualident.
         FieldListSequence = FieldList {";" FieldList}.
         FieldList      = IdentList ":" type.
@@ -248,12 +246,13 @@ standard procedure.
 7. Variable declarations
 Variable declarations serve to introduce variables and associate them with identifiers that must be
 unique within the given scope. They also serve to associate fixed data types with the variables.
+        VariableDeclaration = IdentList ":" type.
+
 
 
 
                                                                                                              5
-          VariableDeclaration = IdentList ":" type.
-Variables whose identifiers appear in the same list are all of the same type. Examples of variable
+ Variables whose identifiers appear in the same list are all of the same type. Examples of variable
 declarations (refer to examples in Ch. 6):
          i, j, k:   INTEGER
          x, y:      REAL
@@ -285,8 +284,8 @@ referenced by p. If r designates a record, then r.f denotes the field f of r. If
 p.f denotes the field f of the record p^, i.e. the dot implies dereferencing and p.f stands for p^.f.
 The typeguard v(T0) asserts that v is of type T0, i.e. it aborts program execution, if it is not of type
 T0. The guard is applicable, if
-1. T0 is an extension of the declared type T of v, and if
-2. v is a variable parameter of record type, or v is a pointer.
+1.T0 is an extension of the declared type T of v, and if
+2.v is a variable parameter of record type, or v is a pointer.
   designator = qualident {selector}.
   selector = "." ident | "[" ExpList "]" | "^" | "(" qualident ")".
   ExpList = expression {"," expression}.
@@ -301,20 +300,20 @@ Examples of designators (see examples in Ch. 7):
          w[3].ch                         (CHAR)
          t.key                           (INTEGER)
          t.left.right                    (Tree)
+         t(CenterNode).subnode           (Tree)
+
 
 
                                                                                                              6
-         t(CenterNode).subnode          (Tree)
-
-8.2. Operators
+ 8.2. Operators
 The syntax of expressions distinguishes between four classes of operators with different
 precedences (binding strengths). The operator ~ has the highest precedence, followed by
 multiplication operators, addition operators, and relations. Operators of the same precedence
-associate from left to right. For example, xyz stands for (xy)z.
+associate from left to right. For example, x−y−z stands for (x−y)−z.
         expression     = SimpleExpression [relation SimpleExpression].
         relation       = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
-        SimpleExpression = ["+"|""] term {AddOperator term}.
-        AddOperator = "+" | "" | OR.
+        SimpleExpression = ["+"|"−"] term {AddOperator term}.
+        AddOperator = "+" | "−" | OR.
         term           = factor {MulOperator factor}.
         MulOperator    = "*" | "/" | DIV | MOD | "&" .
         factor         = number | string | NIL | TRUE | FALSE |
@@ -337,25 +336,26 @@ These operators apply to BOOLEAN operands and yield a BOOLEAN result.
 8.2.2. Arithmetic operators
         symbol      result
         +           sum
-                   difference
+        −           difference
         *           product
         /           quotient
         DIV         integer quotient
         MOD         modulus
-The operators +, , *, and / apply to operands of numeric types. Both operands must be of the
-same type, which is also the type of the result. When used as unary operators,  denotes sign
+The operators +, −, *, and / apply to operands of numeric types. Both operands must be of the
+same type, which is also the type of the result. When used as unary operators, − denotes sign
 inversion and + denotes the identity operation.
 The operators DIV and MOD apply to integer operands only. Let q = x DIV y, and r = x MOD y.
 Then quotient q and remainder r are defined by the equation
-        x = q*y + r              0r<y
+        x = q*y + r              0≤r<y
+
 8.2.3. Set operators
+        symbol      result
 
 
 
                                                                                                    7
-          symbol       result
-          +           union
-                     difference
+           +           union
+          −           difference
           *           intersection
           /           symmetric set difference
 When used with a single operand of type SET, the minus sign denotes the set complement.
@@ -383,12 +383,12 @@ Examples of expressions (refer to examples in Ch. 7):
          1987                  (INTEGER)
          i DIV 3               (INTEGER)
          ~p OR q               (BOOLEAN)
-         (i+j) * (ij)         (INTEGER)
+         (i+j) * (i−j)         (INTEGER)
          s - {8, 9, 13}        (SET)
-         a[i+j] * a[ij]       (REAL)
+         a[i+j] * a[i−j]       (REAL)
          (0<=i) & (i<100)      (BOOLEAN)
          t.key = 0             (BOOLEAN)
-         k IN {i .. j1}       (BOOLEAN)
+         k IN {i .. j−1}       (BOOLEAN)
          t IS CenterNode       (BOOLEAN)
 
 9. Statements
@@ -400,6 +400,7 @@ repetitive execution. A statement may also be empty, in which case it denotes no
 empty statement is included in order to relax punctuation rules in statement sequences.
     statement = [assignment | ProcedureCall | IfStatement | CaseStatement |
         WhileStatement | RepeatStatement | ForStatement].
+
 
 
                                                                                                         8
@@ -455,53 +456,53 @@ which are separated by semicolons.
 
                                                                                                             9
  9.4. If statements
-       IfStatement = IF expression THEN StatementSequence
-              {ELSIF expression THEN StatementSequence}
-              [ELSE StatementSequence]
-              END.
+        IfStatement = IF expression THEN StatementSequence
+               {ELSIF expression THEN StatementSequence}
+               [ELSE StatementSequence]
+               END.
 If statements specify the conditional execution of guarded statements. The Boolean expression
 preceding a statement is called its guard. The guards are evaluated in sequence of occurrence,
 until one evaluates to TRUE, whereafter its associated statement sequence is executed. If no guard
 is satisfied, the statement sequence following the symbol ELSE is executed, if there is one.
 Example:
-       IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
-       ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
-       ELSIF ch = 22X THEN ReadString
-       END
+        IF (ch >= "A") & (ch <= "Z") THEN ReadIdentifier
+        ELSIF (ch >= "0") & (ch <= "9") THEN ReadNumber
+        ELSIF ch = 22X THEN ReadString
+        END
 
 9.5. Case statements
 Case statements specify the selection and execution of a statement sequence according to the
 value of an expression. First the case expression is evaluated, then the statement sequence is
 executed whose case label list contains the obtained value. The case expression must be of type
 INTEGER or CHAR, and all labels must be integers or single-character strings, respectively.
-   CaseStatement =      CASE expression OF case {"|" case} END.
-   case          =      [CaseLabelList ":" StatementSequence].
-   CaseLabelList =      LabelRange {"," LabelRange}.
-   LabelRange    =      label [".." label].
-   label         =      integer | string | ident.
+   CaseStatement     =    CASE expression OF case {"|" case} END.
+   case              =    [CaseLabelList ":" StatementSequence].
+   CaseLabelList     =    LabelRange {"," LabelRange}.
+   LabelRange        =    label [".." label].
+   label             =    integer | string | ident.
 Example:
-       CASE k OF
-            0: x := x + y
-          | 1: x := x  y
-          | 2: x := x * y
-          | 3: x := x / y
-       END
+        CASE k OF
+             0: x := x + y
+           | 1: x := x − y
+           | 2: x := x * y
+           | 3: x := x / y
+        END
 
 9.6. While statements
 While statements specify repetition. If any of the Boolean expressions (guards) yields TRUE, the
 corresponding statement sequence is executed. The expression evaluation and the statement
 execution are repeated until none of the Boolean expressions yields TRUE.
-       WhileStatement = WHILE expression DO StatementSequence
-              {ELSIF expression DO StatementSequence} END.
+        WhileStatement = WHILE expression DO StatementSequence
+               {ELSIF expression DO StatementSequence} END.
 Examples:
-       WHILE j > 0 DO
-          j := j DIV 2; i := i+1
-       END
-       WHILE (t # NIL) & (t.key # i) DO
-          t := t.left
-       END
-       WHILE m > n DO m := m – n
-       ELSIF n > m DO n := n – m
+        WHILE j > 0 DO
+           j := j DIV 2; i := i+1
+        END
+        WHILE (t # NIL) & (t.key # i) DO
+           t := t.left
+        END
+        WHILE m > n DO m := m – n
+        ELSIF n > m DO n := n – m
 
 
 
@@ -623,18 +624,16 @@ Function procedures:
        Name            Argument type              Result type    Function
        ABS(x)          numeric type               type of x      absolute value
        ODD(x)          INTEGER                    BOOLEAN        x MOD 2 = 1
-       LEN(v)          v: array                                  the length of v
+       LEN(v)          v: array                   INTEGER        the length of v
        LSL(x, n)       x: INTEGER                 type of x      logical shift left, x * 2n
        ASR(x, n)       x: INTEGER                 type of x      signed shift right, x DIV 2n
        ROR(x, n)       x: INTEGER                 type of x      x rotated right by n bits
 Type conversion functions:
        Name            Argument type              Result type    Function
-       FLOOR(x)        REAL, LONGREAL             INTEGER        largest integer  x
-       FLT(x)          INTEGER                    REAL           identity
+       FLOOR(x)        REAL                       INTEGER        largest integer ≤ x
+       FLT(x)          INTEGER, BYTE              REAL           identity
        ORD(x)          CHAR, BOOLEAN, SET         INTEGER        ordinal number of x
        CHR(x)          INTEGER                    CHAR           character with ordinal number x
-       LONG(x)         REAL                       LONGREAL       x
-       SHORT(x)        LONGREAL                   REAL           x
 
 Proper procedures:
        Name            Argument types             Function
@@ -654,13 +653,12 @@ Proper procedures:
 Procedures INC and DEC may have an explicit increment or decrement. It must be a constant. Also
 for INCL and EXCL, x must be a constant. The second parameter n of ASSERT is a value
 transmitted to the system as an abort parameter.
+The parameter y of PACK represents the exponent of x. PACK(x, y) is equivalent to x := x * 2 y.
+UNPK is the reverse operation of PACK. The resulting x is normalized, i.e. 1.0 <= x < 2.0.
 
 
                                                                                                     13
- The parameter y of PACK represents the exponent of x. PACK(x, y) is equivalent to x := x * 2y.
-UNPK is the reverse operation of PACK. The resulting x is normalized, i.e. 1.0 <= x < 2.0.
-
-11. Modules
+ 11. Modules
 A module is a collection of declarations of constants, types, variables, and procedures, and a
 sequence of statements for the purpose of assigning initial values to the variables. A module
 typically constitutes a text that is compilable as a unit.
@@ -707,22 +705,25 @@ perhaps facilities to break the data type compatibility rules otherwise imposed 
 definition. It is strongly recommended to restrict their use to specific low-level modules, as such
 modules are inherently non-portable and not "type-safe". However, they are easily recognized due
 to the identifier SYSTEM appearing in their import lists. The subsequent definitions are generally
-applicable. However, individual implementations may include in their module SYSTEM additional
+applicable. However, individual implementations may include in their module S YSTEM additional
 definitions that are particular to the specific, underlying computer. In the following, v stands for a
 variable, x, a, and n for expressions.
+Function procedures:
+
+
 
 
                                                                                                            14
- Function procedures:
-       Name                Argument types          Result type            Function
+        Name                Argument types          Result type            Function
        ADR(v)              any                     INTEGER                address of variable v
        SIZE(T)             any type                INTEGER                size in bytes
        BIT(a, n)           a, n: INTEGER           BOOLEAN                bit n of mem[a]
 
 Proper procedures:
        Name                Argument types                                 Function
-       GET(a, v)           a: INTEGER; v: any basic type                  v := mem[a]
-       PUT(a, x)           a: INTEGER; x: any basic type                  mem[a] := x
+       GET(a, v)      a: INTEGER; v: any basic type      v := mem[a]
+       PUT(a, x)      a: INTEGER; x: any basic type      mem[a] := x
+       COPY(src, dst, n) all INTEGER copy n consecutive words from src to dst
 
 
 Appendix
