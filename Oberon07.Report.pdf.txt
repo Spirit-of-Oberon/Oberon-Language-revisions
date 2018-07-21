@@ -1,5 +1,5 @@
                    The Programming Language Oberon
-                                        Revision 1.10.2013
+                                Revision 1.10.2013 / 10.3.2014
                                              Niklaus Wirth
                      Make it as simple as possible, but not simpler. (A. Einstein)
 
@@ -58,7 +58,7 @@ Numbers are (unsigned) integers or real numbers. Integers are sequences of digit
 followed by a suffix letter. If no suffix is specified, the representation is decimal. The suffix H
 indicates hexadecimal representation.
 A real number always contains a decimal point. Optionally it may also contain a decimal scale
-factor. The letter E is pronounced as "times ten to the power of". A real number is of type REAL.
+factor. The letter E is pronounced as "times ten to the power of".
         number = integer | real.
         integer = digit {digit} | digit {hexDigit} "H" .
         real = digit {digit} "." {digit} [ScaleFactor].
@@ -171,7 +171,7 @@ are the following:
         INTEGER             the integers
         REAL                real numbers
         BYTE                the integers between 0 and 255
-        SET                 the sets of integers between 0 and 31
+        SET                 the sets of integers between 0 and an implementation-dependent limit
 The type BYTE is compatible with the type INTEGER, and vice-versa.
 
 6.2. Array types
@@ -546,7 +546,7 @@ procedure.
          ProcedureHeading = PROCEDURE identdef [FormalParameters].
          ProcedureBody = DeclarationSequence [BEGIN StatementSequence]
                  [RETURN expression] END.
-         DeclarationSequence = [CONST {ConstantDeclaration ";"}]
+         DeclarationSequence = [CONST {ConstDeclaration ";"}]
                  [TYPE {TypeDeclaration ";"}] [VAR {VariableDeclaration ";"}]
                  {ProcedureDeclaration ";"}.
 
